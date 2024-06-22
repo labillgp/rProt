@@ -8,7 +8,7 @@ There are several goals to the intake process:
 * Perform basic cleaning, such as column names
 * Normalize rownames
 * Identify the experiment "structure", which is to say, the biosamples, phenotypes and repeats
-* Optionnaly exclude some columns
+* Optionally exclude some columns
 * Save the configuration in a single rds (R DataSet) file.
 
 ## Running the pipeline
@@ -21,7 +21,7 @@ The steps executed in the file are:
 4. Run the pipeline (main function)
 
 ## Reviewing, analyzing, graphing the data
-The pipeline will produced a new rds file, which name is a function of the pipeline configuration. All data and configuration is including in this process, to analysis and figure can be produced from it. The example pipeline plots a heatmap from the data produced by the pipeline
+The pipeline will produced a new rds file, which name is a function of the pipeline configuration. All data and configuration is including in this process, so analysis and figures can be produced from it. The example pipeline plots a heatmap from the data produced by the pipeline
 
 ## About the configuration
-Any element of the configuration can be modified by setting a new value to the corresponding slot of the configuration file. One can review all possible configuration by inspecting the rds file in RStudio viewer.
+Any element of the configuration can be modified by setting a new value to the corresponding slot of the configuration file. One can review all possible configurations by inspecting the rds file in RStudio viewer.
