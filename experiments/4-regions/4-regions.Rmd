@@ -1,0 +1,60 @@
+---
+title: "MassSpec Data Clustering"
+author: "Guillaume Labilloy"
+date: "May 31th, 2018"
+---
+
+# Introduction
+The Human Scz 0218-05-03 with default configuration.
+
+```{r libs, echo=FALSE, results=FALSE }
+rm(list=ls())
+library(devtools)
+load_all("../../rProt")
+
+source("signatures.R")
+```
+# Run
+
+```{r run}
+
+param.filename                      <- "../../data/11-19-15 raw AUC data_reformatted.rds"
+param.outdir                        <- "./"
+eds                                 <- eds_load(param.filename)
+eds@config                          <- mouse_xct_config()
+
+## Add peptide normalization
+eds@config@normalize@normative_peptide_pattern = "IIPGGAAAQDGR"
+eds@config@aggregate@columns = c('Gene', 'Peptide')
+
+eds@config@normalize@nb_top_peptides <- as.integer(200)
+
+# eds@config@normalize@normative_peptide_pattern = "Disks large homolog 4"
+# eds@config@aggregate@columns = c('Gene', 'Protein')
+
+##eds@ds$Peptide = eds@ds$Protein
+##eds@config@aggregate@columns = c('Gene', 'Peptide')
+##eds@config@aggregate@sep = '@'
+
+#eds@ds                              <- eds@ds[! grepl(';', eds@ds$Gene), ]   ## Remove peptides associated with multiple genes
+param.process_tag                   <- "peptides_normalized"
+
+## MAIN
+main(eds, signatures, param.process_tag)
+
+```
+
+
+# Plot unsupervized clusters
+
+```{r load_results}
+eds = readRDS(paste0("ACC_DLPFC_HPC_STG_", param.process_tag, "_200.rds"))
+```
+
+```{r unc}
+param.outdir = "."
+param.tag = ""
+graph_plot_heatmap_mouse(ds = eds@result@ds_normalized, filetag = paste0("CTL_SCZ_", param.process_tag, "_200"), nofile = FALSE)
+
+```
+

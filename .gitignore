@@ -1,0 +1,17 @@
+data
+.DS_Store
+.Rhistory
+.Rproj.user
+*.html
+*.swp
+.Rbuildignore
+*hello.R
+scratch.Rmd
+*.rds
+*.history
+*.RData
+*.xls
+*.csv
+*.xlsx
+./data/protein name accession number and gene name.tx
+*export/*

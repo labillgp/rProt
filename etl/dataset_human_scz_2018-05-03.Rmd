@@ -1,0 +1,77 @@
+---
+title: "Dataset SCZ Human 2018-05-03"
+output: html_document
+---
+
+
+## Libraries
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(devtools)
+load_all("../rProt") 
+```
+
+
+## Params
+```{r load_data, include=FALSE}
+param.filename <- "../data/human_scz_cleaned_2018-05-03.xlsx"
+param.file.rds <- "../data/human_scz_cleaned_2018-05-03_reformatted.rds"
+param.annotations <- c("Accession", "Gene", "Protein", "Peptide", "Modifications")
+param.no_modification_tag <- "None"
+```
+
+
+
+## Loads and transformations
+```{r load}
+ds <- read.xlsx(xlsxFile = param.filename, sheet = "Area - peptides")
+ds$Modifications <- param.no_modification_tag
+head(ds)
+
+ds = transform(ds, Proteins = colsplit(ds$Protein, pattern = "\\|", names = c('db', 'accession', 'gene')))
+ds = subset(ds, select = c("Proteins.accession", "Proteins.gene", "Protein", "Peptide", "Modifications", "CTL1.1", "CTL1.2", "SCZ1.1", "SCZ1.2"))
+colnames(ds)[1:5] <- param.annotations
+colnames(ds)[6:9] <- c("CTL.1.1", "CTL.1.2", "SCZ.1.1", "SCZ.1.2")
+
+ds$Gene<- gsub(x=ds$Gene, pattern="_HUMAN", replacement = "")
+
+ds[ grepl(pattern = "\\[", x = ds$Peptide), ]$Modifications <- "Modified"
+head(ds)
+```
+
+## Rownames
+```{r rownames}
+ds <- utils_build_rownames( ds, c("Accession", "Peptide", "Modifications"), allow_duplicates = TRUE, sep = "|")
+
+```
+
+
+## Experiment structure is: [Specimen].[technical replicate]  
+```{r experiment_structure}
+rp <- c( "CTL.1.1" = "CTL1", "CTL.1.2" = "CTL2", "SCZ.1.1"="SCZ1", "SCZ.1.2"="SCZ2")
+ep <- rep(FALSE, 4)
+gp <- c("CTL1"="CTL", "CTL2"="CTL","SCZ1"="SCZ", "SCZ2"="SCZ")
+
+r = list()
+for( g in unique(gp) ) {
+  r[[g]] <- names(gp[gp==g])
+}
+
+```
+
+## Export for workflow
+```{r save_rdata}
+eds = new('ExperimentDataset')
+eds@ds <- ds
+eds@annotations <- param.annotations
+eds@genotypes <- names(r)
+eds@runs <- rp
+eds@runs_genotype <- gp
+eds@runs_excluded <- ep
+eds@runs_per_genotypes <- r
+eds@tag <- eds_tag(eds)
+
+saveRDS(object = eds, param.file.rds)
+
+```

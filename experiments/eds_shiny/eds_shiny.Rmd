@@ -1,0 +1,69 @@
+---
+title: "Eds Shiny"
+output: html_document
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(devtools)
+load_all("../../rProt")
+library(DT)
+```
+
+```{r, echo=FALSE}
+eds <- readRDS("../human_scz_2018-05-03/CTL_SCZ_default_200.rds")
+##eds <- readRDS("../a_look_at_aggregation_impact/KOF_KOM_WTF_WTM_gene_pep_200.rds")
+##eds <- readRDS("../default/KOF_KOM_WTF_WTM_default_200.rds")
+PAGE_LENGTH <- 15
+
+render_signature <- function(eds, sig_name) {
+  
+  if( sig_name %in% tstat_get_signature(eds)) {
+    sig = tstat_get_signature(eds, sig_name)
+  } else if ( sig_name %in% nmf_get_signature(eds)) {
+    sig = nmf_get_signature(eds, sig_name)
+  } else if ( sig_name %in% consensus_get_signature(eds)) {
+    sig = consensus_get_signature(eds, sig_name)
+  }
+  
+  DT::renderDataTable({
+    DT::datatable(data.frame(sig),
+                  options = list(pageLength = PAGE_LENGTH))
+  })
+}
+
+
+render_ds <- function(eds, ds_name) {
+  
+  if ( ds_name == 'ds_normalized' ) {
+    ds <- eds@result@ds_normalized
+  } else if ( ds_name == 'ds_aggregated' ) {
+    ds <- eds@result@ds_aggregated
+  } else if ( ds_name == 'ds' ) {
+    ds <- eds@ds
+  }
+  
+  DT::renderDataTable({
+    DT::datatable(ds,
+                  options = list(pageLength = PAGE_LENGTH))
+  })
+}
+```
+
+
+
+```{r, echo=FALSE}
+
+fluidRow(
+    tabsetPanel(
+      id = 'dataset',
+      tabPanel("raw", render_ds(eds, 'ds')),
+      tabPanel("normalized", render_ds(eds, 'ds_normalized')),
+      tabPanel("aggregated", render_ds(eds, 'ds_aggregated')),
+      tabPanel("sig_tstat", render_signature(eds, "SCZ_vs_CTL")),
+      tabPanel("sig_nmf", render_signature(eds, "SCZ")),
+      tabPanel("sig_consensus", render_signature(eds, "tstat:SCZ_vs_CTL|nmf:CTL"))
+    )
+  )
+```
